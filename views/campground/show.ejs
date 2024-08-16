@@ -1,17 +1,31 @@
 <%layout('layout/boilerplate')%>
-<body>
-         <h1><%=campground.title %></h1>
-            <h1><%=campground.location  %></h1>
-            <p>
-                <a href="/campgrounds/<%=campground._id%>/edit">Edit the form</a>
-            </p>
-            <p>
-                <form action="/campground/<%=campground._id%>?_method=DELETE" method="POST">
-                    <button>DELETE</button>
+
+<div class="row">
+    <div class="col-6 offset-3">
+        <div class="card" style="width: 18rem;">
+            <img src="<%=campground.image%>" alt="This image">
+            <div class="card-body">
+              <h5 class="card-title"><%=campground.title %></h5>
+              <p class="card-text"><%=campground.description%> </p>
+            </div>
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item text-muted"><%=campground.location  %></li>
+              <li class="list-group-item">$<%=campground.price%> /night</li>
+              <li class="list-group-item">A third item</li>
+            </ul>
+            <div class="card-body">
+                <a class="card-link btn btn-info" href="/campgrounds/<%=campground._id%>/edit">Edit the form</a>
+                <form  class="d-inline" action="/campground/<%=campground._id%>?_method=DELETE" method="POST">
+                    <button class="btn btn-danger">DELETE</button>
                 </form>
-            </p>
+                
+            </div>
             <footer>
-                <a href="/campgrounds">All campground</a>
+                <a class="card-link" href="/campgrounds">All campground</a>
             </footer>
-</body>
-</html>
+          </div>
+    </div>
+</div>
+ 
+           
+ 
