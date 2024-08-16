@@ -1,0 +1,17 @@
+<%layout('layout/boilerplate')%>
+<body>
+         <h1><%=campground.title %></h1>
+            <h1><%=campground.location  %></h1>
+            <p>
+                <a href="/campgrounds/<%=campground._id%>/edit">Edit the form</a>
+            </p>
+            <p>
+                <form action="/campground/<%=campground._id%>?_method=DELETE" method="POST">
+                    <button>DELETE</button>
+                </form>
+            </p>
+            <footer>
+                <a href="/campgrounds">All campground</a>
+            </footer>
+</body>
+</html>

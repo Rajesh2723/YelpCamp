@@ -1,0 +1,16 @@
+ <%layout('layout/boilerplate')%>
+<body>
+        <h1>All Campgrounds</h1>
+        <div>
+            <a href="/campgrounds/new">Add New Campground</a>
+        </div>
+        <ul>
+            <% for(let campground of camp) {%>
+
+            <li> <a href="/Campgrounds/<%= campground._id  %>"><%= campground.title  %></a></li> 
+                    <!-- (/campground/:id) above code->this code again takes to /campground/:id api and executes that show page-->
+                <%}%>
+        </ul>
+        
+</body>
+</html>
