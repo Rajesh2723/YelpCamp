@@ -6,8 +6,14 @@ const CampgroundSchema=new Schema({ //here no need to call mongoose.Schema
     image:String,
     price:Number,
     description:String,
-    location:String
+    location:String,
+    reviews:[
+        {
+            type:Schema.Types.ObjectId,
+            ref:'Review'     //exporting in review file
+        }
+    ]
 });
-
+//one to many relationship because one campground can have any number of reviews
 
 module.exports=mongoose.model('Campground',CampgroundSchema); //exporting Campground model(only model not a file)
