@@ -64,6 +64,7 @@ app.get('/campgrounds/:id',catchAsync(async (req,res)=>{ //set data for each one
     const campground=await Campground.findById(req.params.id);
     res.render('campground/show',{campground});
 }))
+
 app.post('/campgrounds', catchAsync(async(req,res,next)=>{ //handled form of new.ejs
     //  if(!req.body.campground)throw new ExpressError('Invalid Campground Data',400);
    
