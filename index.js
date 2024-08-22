@@ -5,9 +5,12 @@ const mongoose=require('mongoose');
 const methodOverride=require('method-override');//to make post,patch request
 const Campground=require('./models/campground');
 const Joi=require('joi');
+const Review=require('./models/review');
 const ejsMate=require('ejs-mate');
 const catchAsync=require('./utils/catchAsync');
 const ExpressError=require('./utils/ExpressError');
+const campground = require('./models/campground');
+const review = require('./models/review');
 app.set('view engine','ejs');
 
 app.use(methodOverride('_method'));
@@ -61,10 +64,26 @@ app.get('/campgrounds',catchAsync(async (req,res)=>{ //show all data
 }))
 
 app.get('/campgrounds/:id',catchAsync(async (req,res)=>{ //set data for each one.
-    const campground=await Campground.findById(req.params.id);
+    const campground=await Campground.findById(req.params.id).populate('reviews');
+    // console.log(campground);
     res.render('campground/show',{campground});
 }))
-
+app.post('/campgrounds/:id/reviews',catchAsync (async(req,res)=>{ //for review for a perticular(id) campground 
+     const campground=await Campground.findById(req.params.id);
+     const review=new Review(req.body.review);
+     campground.reviews.push(review);
+     await review.save();
+    //  console.log("review data",review);
+     await campground.save();
+    //  console.log("camground data",campground);
+    res.redirect(`/campgrounds/${campground._id}`);
+}))
+app.delete('/campgrounds/:id/reviews/:reviewId',catchAsync (async(req,res)=>{  
+        const {id,reviewId}=req.params;
+        await Campground.findByIdAndUpdate(id,{$pull:{reviews:reviewId}}); //[ref:review array,ref:review],array of review ids
+        await Review.findByIdAndDelete(req.params.reviewId);
+        res.redirect(`/campgrounds/${id}`);
+}))
 app.post('/campgrounds', catchAsync(async(req,res,next)=>{ //handled form of new.ejs
     //  if(!req.body.campground)throw new ExpressError('Invalid Campground Data',400);
    
