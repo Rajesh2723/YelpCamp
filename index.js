@@ -11,11 +11,12 @@ const catchAsync=require('./utils/catchAsync');
 const ExpressError=require('./utils/ExpressError');
 const campground = require('./models/campground');
 const review = require('./models/review');
+const campgrounds=require('./routes/campground');
 app.set('view engine','ejs');
-
+const reviews=require('./routes/review');
 app.use(methodOverride('_method'));
 
-
+ 
 mongoose.connect('mongodb://localhost:27017/yelp-camp',{ //connecting mongoDb
     useNewUrlParser: true,
     useUnifiedTopology: true
@@ -48,6 +49,8 @@ app.set('views',path.join(__dirname,'views'));
 //     }
 
 // }
+app.use('/campgrounds',campgrounds);
+app.use('/campgrounds/:id/reviews',reviews);
 app.get('/makecampground',async (req,res)=>{
     const camp=new Campground(
         {title:'My Backyard'}
@@ -55,68 +58,14 @@ app.get('/makecampground',async (req,res)=>{
      await camp.save();
     res.send(camp);
 })
-app.get('/campgrounds/new',(req,res)=>{ //order matters here (this must be first)
-    res.render('campground/new');  
-})
-app.get('/campgrounds',catchAsync(async (req,res)=>{ //show all data
-    const camp=await Campground.find({});
-    res.render('campground/index',{camp});
-}))
-
-app.get('/campgrounds/:id',catchAsync(async (req,res)=>{ //set data for each one.
-    const campground=await Campground.findById(req.params.id).populate('reviews');
-    // console.log(campground);
-    res.render('campground/show',{campground});
-}))
-app.post('/campgrounds/:id/reviews',catchAsync (async(req,res)=>{ //for review for a perticular(id) campground 
-     const campground=await Campground.findById(req.params.id);
-     const review=new Review(req.body.review);
-     campground.reviews.push(review);
-     await review.save();
-    //  console.log("review data",review);
-     await campground.save();
-    //  console.log("camground data",campground);
-    res.redirect(`/campgrounds/${campground._id}`);
-}))
-app.delete('/campgrounds/:id/reviews/:reviewId',catchAsync (async(req,res)=>{  
-        const {id,reviewId}=req.params;
-        await Campground.findByIdAndUpdate(id,{$pull:{reviews:reviewId}}); //[ref:review array,ref:review],array of review ids
-        await Review.findByIdAndDelete(req.params.reviewId);
-        res.redirect(`/campgrounds/${id}`);
-}))
-app.post('/campgrounds', catchAsync(async(req,res,next)=>{ //handled form of new.ejs
-    //  if(!req.body.campground)throw new ExpressError('Invalid Campground Data',400);
-   
-        const campground=new Campground(req.body.campground);
-        await campground.save();
-         res.redirect(`/campgrounds/${campground._id}`); //     
-    
-                                                 
-}))
-app.get('/campgrounds/:id/edit',catchAsync(async (req,res)=>{
-    const campground=await Campground.findById(req.params.id);
-    res.render('campground/edit',{campground});
-}))
-app.put('/campgrounds/:id',catchAsync(async (req,res)=>{
-
-    const {id}=req.params;
-    const campground=await Campground.findByIdAndUpdate(id,{...req.body.campground});
-    // res.redirect('/campground/show',{campground});
-    res.redirect(`/campgrounds/${campground._id}`);
-}))
-app.delete('/campground/:id',catchAsync(async (req,res)=>{ //for deleting request
-    const {id}=req.params;
-    await Campground.findByIdAndDelete(id);
-    res.redirect('/campgrounds');
-}))
 app.get('/',(req,res)=>{
     res.render('home');
     
 })
-app.all('*',(req,res,next)=>{
-    next(new ExpressError('Page not Found!!',404))
-    // res.send("404 !!!");
-})
+// app.all('*',(req,res,next)=>{
+//     next(new ExpressError('Page not Found!!',404))
+//     // res.send("404 !!!");
+// })
 app.use((err,req,res,next)=>{
     const{statusCode=500 }=err;
     if(!err.message)err.message='Oh No,Something went Wrong!!'
