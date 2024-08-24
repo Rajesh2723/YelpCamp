@@ -9,9 +9,10 @@ const ExpressError=require('../utils/ExpressError');
 const review = require('../models/review');
 const Review=require('../models/review');
 const ejsMate=require('ejs-mate');
- 
-const app = express();
 
+const app = express();
+app.use(methodOverride('_method'));
+app.use(express.urlencoded({ extended: true }));
 app.set('view engine', 'ejs'); // or 'pug', 'hbs' etc.
 
 router.get('/',catchAsync(async (req,res)=>{ //show all data
@@ -31,6 +32,7 @@ router.post('/', catchAsync(async(req,res,next)=>{ //handled form of new.ejs
     //  if(!req.body.campground)throw new ExpressError('Invalid Campground Data',400);
    
         const campground=new Campground(req.body.campground);
+        req.flash('success','Successfully made a new campground!!');
         await campground.save();
          res.redirect(`/campgrounds/${campground._id}`); //                                       
 }))
@@ -48,7 +50,9 @@ router.put('/:id',catchAsync(async (req,res)=>{
 router.delete('/:id',catchAsync(async (req,res)=>{ //for deleting request
     
     const {id}=req.params;
+    console.log("this is 2coming!!",id);
     await Campground.findByIdAndDelete(id);
+    
     res.redirect('/campgrounds');
 }))
 app.use((err,req,res,next)=>{

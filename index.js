@@ -15,12 +15,26 @@ const campgrounds=require('./routes/campground');
 app.set('view engine','ejs');
 const reviews=require('./routes/review');
 app.use(methodOverride('_method'));
-
+const session=require('express-session');
+const flash=require('connect-flash');
  
 mongoose.connect('mongodb://localhost:27017/yelp-camp',{ //connecting mongoDb
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    // useFindAndModify:false
 });
+const sessionConfig={
+    secret:'thisshouldbebettersecret',
+    resave:false,
+    saveUninitialized:true,
+    cookie:{
+        httpOnly:true,
+        expires:Date.now()+1000*60*60*24*7,
+        maxAge:1000*60*60*24*7
+    }
+}
+app.use(session(sessionConfig))
+app.use(flash())
 app.engine('ejs',ejsMate)//ejs-mate 
 app.use(express.urlencoded({extended:true}))  //  parsing data of json
 const db=mongoose.connection;
@@ -49,6 +63,11 @@ app.set('views',path.join(__dirname,'views'));
 //     }
 
 // }
+app.use((req,res,next)=>{
+    res.locals.success=req.flash('success');
+    next();
+})
+app.use(express.static(path.join(__dirname,'public'))); //to import that public static folder here and use it.
 app.use('/campgrounds',campgrounds);
 app.use('/campgrounds/:id/reviews',reviews);
 app.get('/makecampground',async (req,res)=>{

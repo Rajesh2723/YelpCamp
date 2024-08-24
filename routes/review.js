@@ -19,6 +19,7 @@ router.post('/',catchAsync (async(req,res)=>{ //for review for a perticular(id) 
 }))
 router.delete('/:reviewId',catchAsync (async(req,res)=>{  
        const {id,reviewId}=req.params;
+       console.log("this is coming",reviewId);
        await Campground.findByIdAndUpdate(id,{$pull:{reviews:reviewId}}); //[ref:review array,ref:review],array of review ids
        await Review.findByIdAndDelete(req.params.reviewId);
        res.redirect(`/campgrounds/${id}`);
