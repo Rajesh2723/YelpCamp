@@ -65,6 +65,7 @@ app.set('views',path.join(__dirname,'views'));
 // }
 app.use((req,res,next)=>{
     res.locals.success=req.flash('success');
+    res.locals.error=req.flash('error');
     next();
 })
 app.use(express.static(path.join(__dirname,'public'))); //to import that public static folder here and use it.

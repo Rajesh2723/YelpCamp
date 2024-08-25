@@ -14,6 +14,7 @@ router.post('/',catchAsync (async(req,res)=>{ //for review for a perticular(id) 
     await review.save();
    //  console.log("review data",review);
     await campground.save();
+    req.flash('success','Created a new Review');
    //  console.log("camground data",campground);
    res.redirect(`/campgrounds/${campground._id}`);
 }))
@@ -22,6 +23,7 @@ router.delete('/:reviewId',catchAsync (async(req,res)=>{
        console.log("this is coming",reviewId);
        await Campground.findByIdAndUpdate(id,{$pull:{reviews:reviewId}}); //[ref:review array,ref:review],array of review ids
        await Review.findByIdAndDelete(req.params.reviewId);
+       req.flash('success','Successfully deleted a Review!!');
        res.redirect(`/campgrounds/${id}`);
 }))
 
