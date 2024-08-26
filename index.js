@@ -17,7 +17,12 @@ const reviews=require('./routes/review');
 app.use(methodOverride('_method'));
 const session=require('express-session');
 const flash=require('connect-flash');
- 
+const passport=require('passport');
+const LocalStrategy=require('passport-local');
+const User=require('./models/user');
+const UserRoutes=require('./routes/users');
+
+
 mongoose.connect('mongodb://localhost:27017/yelp-camp',{ //connecting mongoDb
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -33,8 +38,16 @@ const sessionConfig={
         maxAge:1000*60*60*24*7
     }
 }
+  
 app.use(session(sessionConfig))
 app.use(flash())
+app.use(passport.initialize());
+app.use(passport.session());  
+
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
 app.engine('ejs',ejsMate)//ejs-mate 
 app.use(express.urlencoded({extended:true}))  //  parsing data of json
 const db=mongoose.connection;
@@ -68,7 +81,14 @@ app.use((req,res,next)=>{
     res.locals.error=req.flash('error');
     next();
 })
+app.get('/fakeUser',async(req,res)=>{
+    const user=new User({email:'Raj@gmail.com',username:'Raj'});
+    const newUser=await User.register(user,'Rak');
+    res.send(newUser);
+})
+
 app.use(express.static(path.join(__dirname,'public'))); //to import that public static folder here and use it.
+app.use('/',UserRoutes);
 app.use('/campgrounds',campgrounds);
 app.use('/campgrounds/:id/reviews',reviews);
 app.get('/makecampground',async (req,res)=>{
