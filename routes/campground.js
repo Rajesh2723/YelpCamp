@@ -9,6 +9,7 @@ const ExpressError=require('../utils/ExpressError');
 const review = require('../models/review');
 const Review=require('../models/review');
 const ejsMate=require('ejs-mate');
+const {isLoggedIn}=require('../middleware');
 
 const app = express();
 app.use(methodOverride('_method'));
@@ -20,15 +21,16 @@ router.get('/',catchAsync(async (req,res)=>{ //show all data
     // res.send("router is working!!");
     res.render('campground/index',{camp});
 }))
-router.get('/new',(req,res)=>{ //order matters here (this must be first)
+router.get('/new',isLoggedIn,(req,res)=>{ //order matters here (this must be first)
+    
     res.render('campground/new');  
 })
-router.get('/:id',catchAsync(async (req,res)=>{ //set data for each one.
+router.get('/:id',isLoggedIn,catchAsync(async (req,res)=>{ //set data for each one.
     const campground=await Campground.findById(req.params.id).populate('reviews');
     // console.log(campground);
     res.render('campground/show',{campground});
 }))
-router.post('/', catchAsync(async(req,res,next)=>{ //handled form of new.ejs
+router.post('/',isLoggedIn, catchAsync(async(req,res,next)=>{ //handled form of new.ejs
     //  if(!req.body.campground)throw new ExpressError('Invalid Campground Data',400);
    
         const campground=new Campground(req.body.campground);
@@ -40,7 +42,7 @@ router.get('/:id/edit',catchAsync(async (req,res)=>{
     const campground=await Campground.findById(req.params.id);
     res.render('campground/edit',{campground});
 }))
-router.put('/:id',catchAsync(async (req,res)=>{
+router.put('/:id',isLoggedIn,catchAsync(async (req,res)=>{
 
     const {id}=req.params;
     const campground=await Campground.findByIdAndUpdate(id,{...req.body.campground});
@@ -48,7 +50,7 @@ router.put('/:id',catchAsync(async (req,res)=>{
     req.flash('success','Successfully Updated campground');
     res.redirect(`/campgrounds/${campground._id}`);
 }))
-router.delete('/:id',catchAsync(async (req,res)=>{ //for deleting request
+router.delete('/:id',isLoggedIn,catchAsync(async (req,res)=>{ //for deleting request
     
     const {id}=req.params;
     console.log("this is 2coming!!",id);
