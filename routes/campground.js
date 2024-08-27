@@ -26,14 +26,16 @@ router.get('/new',isLoggedIn,(req,res)=>{ //order matters here (this must be fir
     res.render('campground/new');  
 })
 router.get('/:id',isLoggedIn,catchAsync(async (req,res)=>{ //set data for each one.
-    const campground=await Campground.findById(req.params.id).populate('reviews');
-    // console.log(campground);
+    const campground=await Campground.findById(req.params.id).populate('reviews').populate('author');
+    console.log(campground);
     res.render('campground/show',{campground});
 }))
 router.post('/',isLoggedIn, catchAsync(async(req,res,next)=>{ //handled form of new.ejs
     //  if(!req.body.campground)throw new ExpressError('Invalid Campground Data',400);
    
         const campground=new Campground(req.body.campground);
+        campground.author=req.user._id;
+        console.log("User id:",req.user._id);
         req.flash('success','Successfully made a new campground!!');
         await campground.save();
          res.redirect(`/campgrounds/${campground._id}`); //                                       
@@ -42,7 +44,7 @@ router.get('/:id/edit',catchAsync(async (req,res)=>{
     const campground=await Campground.findById(req.params.id);
     res.render('campground/edit',{campground});
 }))
-router.put('/:id',isLoggedIn,catchAsync(async (req,res)=>{
+router.put('/:id',isLoggedIn,catchAsync(async (req,res)=>{//updating the campground
 
     const {id}=req.params;
     const campground=await Campground.findByIdAndUpdate(id,{...req.body.campground});
