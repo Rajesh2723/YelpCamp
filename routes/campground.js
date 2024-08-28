@@ -10,8 +10,12 @@ const review = require('../models/review');
 const Review=require('../models/review');
 const ejsMate=require('ejs-mate');
 const {isLoggedIn}=require('../middleware');
-
+const multer = require('multer');
+// console.log(__dirname);
+const {storage}=require('../cloudinary');
+const upload=multer({ storage});
 const app = express();
+
 app.use(methodOverride('_method'));
 app.use(express.urlencoded({ extended: true }));
 app.set('view engine', 'ejs'); // or 'pug', 'hbs' etc.
@@ -42,25 +46,34 @@ router.get('/:id',isLoggedIn,catchAsync(async (req,res)=>{ //set data for each o
     console.log(campground);
     res.render('campground/show',{campground});
 }))
-router.post('/',isLoggedIn, catchAsync(async(req,res,next)=>{ //handled form of new.ejs
+router.post('/',isLoggedIn,upload.array('image'), catchAsync(async(req,res,next)=>{ //handled form of new.ejs
     //  if(!req.body.campground)throw new ExpressError('Invalid Campground Data',400);
     const { id } = req.params;
         const campground=new Campground(req.body.campground);
+        campground.images=req.files.map(f=>({url:f.path,filename:f.filename}));
         campground.author=req.user._id;
         console.log("User id:",req.user._id);
         req.flash('success','Successfully made a new campground!!');
         await campground.save();
-         res.redirect(`/campgrounds/${campground._id}`); //                                       
+        console.log(campground.images);
+         res.redirect(`/campgrounds/${campground._id}`); //    
+    // console.log(req.file);
+    // console.log(req.body,req.files);
+    // res.send("It worked!!");
+                                       
 }))
 router.get('/:id/edit',isLoggedIn,isAuthor,catchAsync(async (req,res)=>{
     
     const campground=await Campground.findById(req.params.id);
     res.render('campground/edit',{campground});
 }))
-router.put('/:id',isLoggedIn,isAuthor,catchAsync(async (req,res)=>{//updating the campground
+router.put('/:id',isLoggedIn,isAuthor,upload.array('image'),catchAsync(async (req,res)=>{//updating the campground
 
     const { id } = req.params;
     const campground=await Campground.findByIdAndUpdate(id,{...req.body.campground});
+    const imgs=req.files.map(f=>({url:f.path,filename:f.filename}));
+    campground.images.push(...imgs);
+     await campground.save();
     // res.redirect('/campground/show',{campground});
     req.flash('success','Successfully Updated campground');
     res.redirect(`/campgrounds/${campground._id}`);

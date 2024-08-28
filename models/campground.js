@@ -4,7 +4,12 @@ const Schema=mongoose.Schema;   // so that we can use Schema.Type.something
 
 const CampgroundSchema=new Schema({ //here no need to call mongoose.Schema 
     title:String,
-    image:String,
+    images: [
+        {url:String,
+            filename:String
+        }
+
+    ],
     price:Number,
     description:String,
     location:String,
