@@ -14,6 +14,8 @@ const multer = require('multer');
 // console.log(__dirname);
 const {storage}=require('../cloudinary');
 const upload=multer({ storage});
+const maptilerClient = require("@maptiler/client");
+maptilerClient.config.apiKey = process.env.MAPTILER_API_KEY;
 const app = express();
 
 app.use(methodOverride('_method'));
@@ -48,14 +50,17 @@ router.get('/:id',isLoggedIn,catchAsync(async (req,res)=>{ //set data for each o
 }))
 router.post('/',isLoggedIn,upload.array('image'), catchAsync(async(req,res,next)=>{ //handled form of new.ejs
     //  if(!req.body.campground)throw new ExpressError('Invalid Campground Data',400);
-    const { id } = req.params;
-        const campground=new Campground(req.body.campground);
+    const geoData = await maptilerClient.geocoding.forward(req.body.campground.location, { limit: 1 });
+    const campground = new Campground(req.body.campground);
+    campground.geometry = geoData.features[0].geometry;
+    // res.send(geoData.features[0].geometry ); 
+        const { id } = req.params;
         campground.images=req.files.map(f=>({url:f.path,filename:f.filename}));
         campground.author=req.user._id;
         console.log("User id:",req.user._id);
         req.flash('success','Successfully made a new campground!!');
         await campground.save();
-        console.log(campground.images);
+        console.log(campground);
          res.redirect(`/campgrounds/${campground._id}`); //    
     // console.log(req.file);
     // console.log(req.body,req.files);
@@ -74,6 +79,10 @@ router.put('/:id',isLoggedIn,isAuthor,upload.array('image'),catchAsync(async (re
     const imgs=req.files.map(f=>({url:f.path,filename:f.filename}));
     campground.images.push(...imgs);
      await campground.save();
+     if(req.body.deleteImages){
+       await campground.updateOne({$pull:{images:{filename:{$in:req.body.deleteImages}}}});
+       console.log(campground);
+     }
     // res.redirect('/campground/show',{campground});
     req.flash('success','Successfully Updated campground');
     res.redirect(`/campgrounds/${campground._id}`);
