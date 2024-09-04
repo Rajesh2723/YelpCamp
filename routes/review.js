@@ -15,6 +15,7 @@ router.post('/',catchAsync (async(req,res)=>{ //for review for a perticular(id) 
    //  console.log("review data",review);
     await campground.save();
     req.flash('success','Created a new Review');
+//     res.send(campground);
    //  console.log("camground data",campground);
    res.redirect(`/campgrounds/${campground._id}`);
 }))

@@ -50,9 +50,9 @@ router.get('/:id',isLoggedIn,catchAsync(async (req,res)=>{ //set data for each o
 }))
 router.post('/',isLoggedIn,upload.array('image'), catchAsync(async(req,res,next)=>{ //handled form of new.ejs
     //  if(!req.body.campground)throw new ExpressError('Invalid Campground Data',400);
-    const geoData = await maptilerClient.geocoding.forward(req.body.campground.location, { limit: 1 });
+    // const geoData = await maptilerClient.geocoding.forward(req.body.campground.location, { limit: 1 });
     const campground = new Campground(req.body.campground);
-    campground.geometry = geoData.features[0].geometry;
+    // campground.geometry = geoData.features[0].geometry;
     // res.send(geoData.features[0].geometry ); 
         const { id } = req.params;
         campground.images=req.files.map(f=>({url:f.path,filename:f.filename}));

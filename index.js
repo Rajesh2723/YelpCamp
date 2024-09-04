@@ -1,6 +1,7 @@
 if(process.env.NODE_ENV!=="production"){
     require('dotenv').config();
 }
+
 console.log(process.env.SECRET);
 console.log(process.env.API_KEY);
 const express=require('express');
@@ -26,14 +27,27 @@ const passport=require('passport');
 const LocalStrategy=require('passport-local');
 const User=require('./models/user');
 const UserRoutes=require('./routes/users');
+const MongoStore =require("connect-mongo");
+// const dbUrl=process.env.DB_URL;
 
-
-
-mongoose.connect('mongodb://localhost:27017/yelp-camp',{ //connecting mongoDb
+// 'mongodb://localhost:27017/yelp-camp'
+ const dbUrl='mongodb://localhost:27017/yelp-camp';
+mongoose.connect( dbUrl,{ //connecting mongoDb
     useNewUrlParser: true,
     useUnifiedTopology: true,
     // useFindAndModify:false
 });
+const store = MongoStore.create({
+    mongoUrl: dbUrl,
+    touchAfter: 24 * 60 * 60,
+    crypto: {
+        secret: 'thisshouldbeabettersecret!'
+    }
+});
+store.on("error",function(e){
+    console.log("SESSION STORE ERROR!!");
+})
+
 const sessionConfig={
     secret:'thisshouldbebettersecret',
     resave:false,

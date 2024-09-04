@@ -9,19 +9,18 @@ const CampgroundSchema=new Schema({ //here no need to call mongoose.Schema
         {url:String,
             filename:String
         }
-
     ],
-    geometry:{
-        type:{
-            type:String,
-            enum:['Point'],
-            required:true
-        },
-        coordinates:{
-            type:[Number],
-            required:true
-        }
-    },
+    // geometry:{
+    //     type:{
+    //         type:String,
+    //         enum:['Point'],
+    //         required:true
+    //     },
+    //     coordinates:{
+    //         type:[Number],
+    //         required:true
+    //     }
+    // },
     price:Number,
     description:String,
     location:String,
